@@ -1,0 +1,18 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+# config/routes.yaml
+catalogue_index:
+  path: /catalogue
+  controller: App\Controller\OperationController::index
+  methods: GET
+
+# Define other CRUD endpoints...
+
+arithmetic_operations:
+  path: /operation/arithmetic/{operation}
+  controller: App\Controller\OperationController::arithmetic
+  methods: POST
