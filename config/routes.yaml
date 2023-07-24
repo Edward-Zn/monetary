@@ -4,15 +4,23 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-# config/routes.yaml
+index:
+    path: /
+    controller: App\Controller\IndexController::index
+    methods: [GET]
+
 catalogue_index:
   path: /catalogue
-  controller: App\Controller\OperationController::index
+  controller: App\Controller\CatalogueController::index
   methods: GET
 
-# Define other CRUD endpoints...
+catalogue_list:
+  path: /catalogue
+  controller: App\Controller\CatalogueController::index
+  methods: GET
 
 arithmetic_operations:
-  path: /operation/arithmetic/{operation}
-  controller: App\Controller\OperationController::arithmetic
+  path: /catalogue/arithmetic/{operation}
+  controller: App\Controller\CatalogueController::arithmetic
   methods: POST
+  
