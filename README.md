@@ -131,3 +131,46 @@ Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-
 ```
 **Response**:
 Cost multiplied successfully. Value was 145p 10s 3d || Item Name new cost value is 436p 10s 9d
+
+### Read Item from Catalogue
+
+**Endpoint**: `/catalogue/{identificationCode}`
+**Method**: GET
+
+Gets the catalogue item identified by {identificationCode}
+
+**Parameters**:
+- `{identificationCode}`: The identification code of the catalogue item
+
+**Example**:
+```bash
+Read Item
+curl -X GET http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff
+```
+
+Alternative for PowerShell:
+```bash
+Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff' -Method Get -UseBasicParsing
+```
+**Response**:
+{"id":5,"identificationCode":"a9bf5032-6f50-4fe9-b770-3bafe7448aff","name":"Item Name","cost":"163344"}
+
+### Read All Items from Catalogue
+
+**Endpoint**: `api/catalogue`
+**Method**: GET
+
+Gets all catalogue items
+
+**Example**:
+```bash
+Read Catalogue
+curl -X GET http://monetary.local/api/catalogue
+```
+
+Alternative for PowerShell:
+```bash
+Invoke-WebRequest -Uri 'http://monetary.local/api/catalogue' -Method Get -UseBasicParsing
+```
+**Response**:
+[{"id":5,"identificationCode":"a9bf5032-6f50-4fe9-b770-3bafe7448aff","name":"Alpha","cost":"163344"},{"id":8,"identificationCode":"75db9c61-ca54-4641-a54d-20375ae61e0b","name":"Testing new item","cost...}]
