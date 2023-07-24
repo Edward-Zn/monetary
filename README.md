@@ -23,7 +23,7 @@ Follow these steps to set up the project on your local machine.
 2. Change to the project directory:
 
 ```bash
-   cd your-repo
+   cd monetary
 ```
 
 3. Install dependencies using Composer:
@@ -74,9 +74,44 @@ Adds the specified amount to the cost of the catalogue item identified by {ident
 ```bash
 Addition
 curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/2p6s3d
-
-Subtraction
-curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/subtract/1p5s11d
 ```
 **Response**:
 Cost added successfully. Value was 8p14s2d || Item Name new cost value is 11p20s5d
+
+### Subtract Cost from Catalogue Item
+
+**Endpoint**: `/catalogue/{identificationCode}/subtract/{amount}`
+**Method**: POST
+
+Subtracts the specified amount from the cost of the catalogue item identified by {identificationCode}.
+
+**Parameters**:
+- `{identificationCode}`: The identification code of the catalogue item.
+- `{amount}`: The amount to be subtracted in the format "XpYsZd" (e.g., "5p17s8d").
+
+**Example**:
+```bash
+Subtraction
+curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/subtract/1p4s9d
+```
+**Response**:
+Cost subtracted successfully. Value was: 146p 15s 0d || Item Name new cost value is: 145p 10s 3d
+
+### Multiply Cost of Catalogue Item
+
+**Endpoint**: `/catalogue/{identificationCode}/multiply/{multiplier}`
+**Method**: POST
+
+Multiplies the item cost of the catalogue item identified by {identificationCode} by specified multiplier
+
+**Parameters**:
+- `{identificationCode}`: The identification code of the catalogue item.
+- `{multiplier}`: The multiplier for the item cost value (e.g., 3).
+
+**Example**:
+```bash
+Multiplication
+curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/multiply/3
+```
+**Response**:
+Cost multiplied successfully. Value was 145p 10s 3d || Item Name new cost value is 436p 10s 9d
