@@ -4,13 +4,17 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
 use App\Entity\CatalogueItem;
-use App\Form\CatalogueItemType;
+use App\Form\Type\CatalogueItemType;
+use App\Service\CurrencyConverter;
 
 class CatalogueController extends AbstractController
 {
@@ -47,8 +51,15 @@ class CatalogueController extends AbstractController
         $catalogueItem->prepareForPersist();
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $entityManager = $this->doctrine->getManager();
+            $entityManager->persist($catalogueItem);
+
+            $costString = $form->get('cost')->getData();
+
+            $costInPence = $catalogueItem->parseCost($costString);
+
+            $catalogueItem->setCost($costInPence);
+
             $entityManager->persist($catalogueItem);
             $entityManager->flush();
 
@@ -63,7 +74,7 @@ class CatalogueController extends AbstractController
     /**
      * Update an existing catalogue item
      * 
-     * @Route("/catalogue/{id}/edit", name="catalogue_edit", methods={"GET", "POST"})
+     * @Route("/catalogue/{identificationCode}/edit", name="catalogue_edit", methods={"GET", "POST"})
      */
     public function edit(Request $request, CatalogueItem $catalogueItem, CsrfTokenManagerInterface $csrfTokenManager): Response
     {
@@ -73,6 +84,16 @@ class CatalogueController extends AbstractController
         $csrfToken = $csrfTokenManager->getToken('delete' . $catalogueItem->getId());
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->doctrine->getManager();
+            $costString = $form->get('cost')->getData();
+
+            $costInPence = $catalogueItem->parseCost($costString);
+
+            $catalogueItem->setCost($costInPence);
+
+            $entityManager->persist($catalogueItem);
+            $entityManager->flush();
+
             $this->doctrine->getManager()->flush();
 
             return $this->redirectToRoute('catalogue_list');
@@ -88,7 +109,7 @@ class CatalogueController extends AbstractController
     /**
      * Delete a catalogue item
      * 
-     * @Route("/catalogue/{id}", methods={"POST"}, name="catalogue_delete")
+     * @Route("/catalogue/{identificationCode}", methods={"POST"}, name="catalogue_delete")
      */
     public function delete(Request $request, CatalogueItem $catalogueItem): Response
     {
@@ -103,10 +124,9 @@ class CatalogueController extends AbstractController
 
     private function createDeleteForm(CatalogueItem $catalogueItem, $csrfToken)
     {
-        // Create a form for the delete action
         return $this->createFormBuilder(null, [
                 'method' => 'DELETE',
-                'action' => $this->generateUrl('catalogue_delete', ['id' => $catalogueItem->getId()]),
+                'action' => $this->generateUrl('catalogue_delete', ['identificationCode' => $catalogueItem->getIdentificationCode()]),
             ])
             ->add('token', HiddenType::class, [
                 'data' => $csrfToken,
@@ -115,39 +135,114 @@ class CatalogueController extends AbstractController
     }
 
     /**
-     * Perform arithmetic operations.
-     *
-     * @Route("/catalogue/arithmetic/{operation}", methods={"POST"})
+     * @Route("/catalogue/{identificationCode}", methods={"GET"}, name="catalogue_read_item")
      */
-    public function arithmetic(Request $request, string $operation): Response
+    public function readItem(string $identificationCode, SerializerInterface $serializer): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $catalogueItem = $this->doctrine->getRepository(CatalogueItem::class)->findOneBy(['identificationCode' => $identificationCode]);
 
-        $result = null;
-
-        if ($operation === 'addition') {
-            $result = $this->performAddition($data['value1'], $data['value2']);
-        } elseif ($operation === 'subtraction') {
-            $result = $this->performSubtraction($data['value1'], $data['value2']);
-        } elseif ($operation === 'multiplication') {
-            $result = $this->performMultiplication($data['value'], $data['multiplier']);
+        if (!$catalogueItem) {
+            return new JsonResponse(['error' => 'Item not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        return $this->json(['result' => $result]);
+        $json = $serializer->serialize($catalogueItem, 'json');
+
+        return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
     }
 
-    private function performAddition(string $value1, string $value2): string
+    /**
+     * @Route("/api/catalogue", methods={"GET"}, name="catalogue_api")
+     */
+    public function getAllItems(SerializerInterface $serializer): JsonResponse
     {
-        return (string) ($value1 + $value2);
+        $catalogueItems = $this->doctrine->getRepository(CatalogueItem::class)->findAll();
+        $json = $serializer->serialize($catalogueItems, 'json');
+
+        return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
     }
 
-    private function performSubtraction(string $value1, string $value2): string
+    /**
+     * @Route("/catalogue/{identificationCode}/add/{amount}", methods={"[GET, POST]"}, name="catalogue_add")
+     */
+    public function addCost(CatalogueItem $catalogueItem, string $amount, EntityManagerInterface $entityManager): Response
     {
-        return (string) ($value1 - $value2);
+        // Regular expression to match the format "XpYsZd"
+        $pattern = '/^(\d+)p(\d+)s(\d+)d$/';
+
+        if (preg_match($pattern, $amount, $matches)) {
+            $pounds = (int)$matches[1];
+            $shillings = (int)$matches[2];
+            $pence = (int)$matches[3];
+
+            // Convert pounds and shillings to pence and add to the total cost
+            $totalPence = ($pounds * 240) + ($shillings * 12) + $pence;
+
+            $oldCost = $catalogueItem->getCost();
+            // Update the CatalogueItem entity with the new total cost in pence
+            $catalogueItem->setCost($catalogueItem->getCost() + $totalPence);
+
+            // Persist and flush the changes to the database
+            $entityManager->persist($catalogueItem);
+            $entityManager->flush();
+
+            return new Response(
+                'Cost added successfully. Value was ' . CurrencyConverter::penceToString($oldCost) .
+                ' || ' . $catalogueItem->getName() . ' new cost value is ' . CurrencyConverter::penceToString($catalogueItem->getCost())
+            );
+        }
+
+        return new Response('Invalid format for amount. Has to be "XpYsZd" Where X is pounds amount, Y is shillings amount and Z is pence amount', 400);
     }
 
-    private function performMultiplication(string $value, int $multiplier): string
+    /**
+     * @Route("/catalogue/{id}/subtract/{amount}", methods={"POST"}, name="catalogue_subtract")
+     */
+    public function subtractCost(CatalogueItem $catalogueItem, string $amount, EntityManagerInterface $entityManager): Response
     {
-        return (string) ($value * $multiplier);
+        $pattern = '/^(\d+)p(\d+)s(\d+)d$/';
+
+        if (preg_match($pattern, $amount, $matches)) {
+            $pounds = (int)$matches[1];
+            $shillings = (int)$matches[2];
+            $pence = (int)$matches[3];
+
+            $totalPence = ($pounds * 240) + ($shillings * 12) + $pence;
+
+            $oldCost = $catalogueItem->getCost();
+            $catalogueItem->setCost($catalogueItem->getCost() - $totalPence);
+
+            $entityManager->persist($catalogueItem);
+            $entityManager->flush();
+
+            return new Response(
+                'Cost subtracted successfully. Value was: ' . CurrencyConverter::penceToString($oldCost) .
+                ' || ' . $catalogueItem->getName() . ' new cost value is: ' . CurrencyConverter::penceToString($catalogueItem->getCost())
+            );
+        }
+
+        return new Response('Invalid format for amount. Has to be "XpYsZd" Where X is pounds amount, Y is shillings amount and Z is pence amount', 400);
+    }
+
+    /**
+     * @Route("/catalogue/{id}/multiply/{multiplier}", methods={"POST"}, name="catalogue_multiply")
+     */
+    public function multiplyCost(CatalogueItem $catalogueItem, int $multiplier, EntityManagerInterface $entityManager): Response
+    {
+        if (is_integer($multiplier)) {
+            $pence = $catalogueItem->getCost();
+            $newPence = $pence * $multiplier;
+            $oldCost = $catalogueItem->getCost();
+
+            $catalogueItem->setCost($newPence);
+
+            $entityManager->flush();
+
+            return new Response(
+                'Cost multiplied successfully. Value was ' . CurrencyConverter::penceToString($oldCost) .
+                ' || ' . $catalogueItem->getName() . ' new cost value is ' . CurrencyConverter::penceToString($catalogueItem->getCost())
+            );
+        }
+
+        return new Response('Invalid format for multiplier. Has to be valid integer', 400);
     }
 }

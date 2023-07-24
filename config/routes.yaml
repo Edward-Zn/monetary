@@ -19,8 +19,55 @@ catalogue_list:
   controller: App\Controller\CatalogueController::index
   methods: GET
 
-arithmetic_operations:
-  path: /catalogue/arithmetic/{operation}
-  controller: App\Controller\CatalogueController::arithmetic
-  methods: POST
+# arithmetic_operations:
+#   path: /catalogue/arithmetic/{operation}
+#   controller: App\Controller\CatalogueController::arithmetic
+#   methods: POST
   
+# Route to read an item from the catalogue based on its identification code
+catalogue_read_item:
+    path: /catalogue/{identificationCode}
+    methods: GET
+    controller: App\Controller\CatalogueController::readItem
+
+# Route to obtain the list of all items in the catalogue
+catalogue_api:
+    path: /api/catalogue
+    methods: GET
+    controller: App\Controller\CatalogueController::getAllItems
+
+# Route for addition
+# catalogue_addition:
+#     path: /catalogue/addition
+#     methods: POST
+#     controller: App\Controller\CatalogueController::performAddition
+
+# Route for subtraction
+# catalogue_subtraction:
+#     path: /catalogue/subtraction
+#     methods: POST
+#     controller: App\Controller\CatalogueController::performSubtraction
+
+# Route for integer multiplication
+# catalogue_multiplication:
+#     path: /catalogue/multiplication
+#     methods: POST
+#     controller: App\Controller\CatalogueController::performMultiplication
+
+# Route for addition
+catalogue_add:
+    path: /catalogue/{identificationCode}/add/{amount}
+    methods: [GET, POST]
+    controller: App\Controller\CatalogueController::addCost
+
+# Route for subtraction
+catalogue_subtract:
+    path: /catalogue/{identificationCode}/subtract/{amount}
+    methods: [GET, POST]
+    controller: App\Controller\CatalogueController::subtractCost
+
+# Route for integer multiplication
+catalogue_multiply:
+    path: /catalogue/{identificationCode}/multiply/{multiplier}
+    methods: [GET, POST]
+    controller: App\Controller\CatalogueController::multiplyCost

@@ -24,11 +24,11 @@
                                 <td>{{ loop.index }}</td>
                                 <td>{{ item.identificationCode }}</td>
                                 <td>{{ item.name }}</td>
-                                <td>{{ item.cost|number_format(2, '.', ',') }}</td>
+                                <td>{{ item.cost|format_cost }}</td>
                                 <td>
                                     <div class="d-flex justify-content-start">
-                                        <a href="{{ path('catalogue_edit', {'id': item.id}) }}" class="btn btn-primary me-1 btn-sm">Edit</a>
-                                        <form action="{{ path('catalogue_delete', {'id': item.id}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this item?')">
+                                        <a href="{{ path('catalogue_edit', {'identificationCode': item.identificationCode}) }}" class="btn btn-primary me-1 btn-sm">Edit</a>
+                                        <form action="{{ path('catalogue_delete', {'identificationCode': item.identificationCode}) }}" method="post" onsubmit="return confirm('Are you sure you want to delete item {{ item.name }}?')">
                                             <input type="hidden" name="_method" value="DELETE">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
