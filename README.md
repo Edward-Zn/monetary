@@ -56,3 +56,27 @@ symfony serve
 ```
 
 7. Open your browser and access the application at http://localhost:8000
+
+## API Documentation
+
+### Add Cost to Catalogue Item
+
+**Endpoint**: `/catalogue/{identificationCode}/add/{amount}`
+**Method**: POST
+
+Adds the specified amount to the cost of the catalogue item identified by {identificationCode}.
+
+**Parameters**:
+- `{identificationCode}`: The identification code of the catalogue item.
+- `{amount}`: The amount to be added in the format "XpYsZd" (e.g., "5p17s8d").
+
+**Example**:
+```bash
+Addition
+curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/2p6s3d
+
+Subtraction
+curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/subtract/1p5s11d
+```
+**Response**:
+Cost added successfully. Value was 8p14s2d || Item Name new cost value is 11p20s5d
