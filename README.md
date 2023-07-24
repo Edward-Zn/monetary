@@ -75,6 +75,11 @@ Adds the specified amount to the cost of the catalogue item identified by {ident
 Addition
 curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/2p6s3d
 ```
+
+Alternative for PowerShell:
+```bash
+Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/2p6s3d' -Method Post -UseBasicParsing
+```
 **Response**:
 Cost added successfully. Value was 8p14s2d || Item Name new cost value is 11p20s5d
 
@@ -94,6 +99,12 @@ Subtracts the specified amount from the cost of the catalogue item identified by
 Subtraction
 curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/subtract/1p4s9d
 ```
+
+Alternative for PowerShell:
+```bash
+Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/1p4s9d' -Method Post -UseBasicParsing
+```
+
 **Response**:
 Cost subtracted successfully. Value was: 146p 15s 0d || Item Name new cost value is: 145p 10s 3d
 
@@ -112,6 +123,11 @@ Multiplies the item cost of the catalogue item identified by {identificationCode
 ```bash
 Multiplication
 curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/multiply/3
+```
+
+Alternative for PowerShell:
+```bash
+Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/multiply/3' -Method Post -UseBasicParsing
 ```
 **Response**:
 Cost multiplied successfully. Value was 145p 10s 3d || Item Name new cost value is 436p 10s 9d
