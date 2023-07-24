@@ -102,7 +102,7 @@ curl -X POST http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448af
 
 Alternative for PowerShell:
 ```bash
-Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/add/1p4s9d' -Method Post -UseBasicParsing
+Invoke-WebRequest -Uri 'http://monetary.local/catalogue/a9bf5032-6f50-4fe9-b770-3bafe7448aff/subtract/1p4s9d' -Method Post -UseBasicParsing
 ```
 
 **Response**:
