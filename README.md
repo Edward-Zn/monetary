@@ -1,6 +1,6 @@
 # GBP Monetary
 
-UK monetary sytem operations
+UK monetary system operations
 
 ## Getting Started
 
@@ -117,7 +117,7 @@ Multiplies the item cost of the catalogue item identified by {identificationCode
 
 **Parameters**:
 - `{identificationCode}`: The identification code of the catalogue item.
-- `{multiplier}`: The multiplier for the item cost value (e.g., 3).
+- `{multiplier}`: The multiplier for the item cost value (e.g. 3).
 
 **Example**:
 ```bash
